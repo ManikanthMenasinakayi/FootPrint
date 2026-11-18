@@ -30,7 +30,8 @@ import {
   Layers,
   Edit3,
   Award,
-  ArrowRight
+  ArrowRight,
+  X
 } from 'lucide-react';
 import { getLayoutedElements } from './layoutGraph';
 
@@ -73,13 +74,21 @@ export default function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
-  // Auth form state
+  // Landing Page Auth Modal & Form state
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [authTab, setAuthTab] = useState('login'); // 'login' | 'signup'
   const [loginPortal, setLoginPortal] = useState('learner'); // 'learner' | 'instructor'
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
+
+  const openAuth = (portal = 'learner', tab = 'login') => {
+    setLoginPortal(portal);
+    setAuthTab(tab);
+    setAuthError('');
+    setShowAuthModal(true);
+  };
 
   // Course & Graph state
   const [courses, setCourses] = useState([]);
@@ -144,6 +153,7 @@ export default function App() {
       }
 
       localStorage.setItem('footprint_user', JSON.stringify(res.data));
+      setShowAuthModal(false);
       setCurrentUser(res.data);
     } catch (err) {
       setAuthError(err.response?.data?.error || 'Authentication failed.');
@@ -498,305 +508,676 @@ export default function App() {
   };
 
   // =========================================================
-  // VIEW 1: SPLIT-SCREEN HERO LOGIN / SIGNUP PORTAL
+  // VIEW 1: PROFESSIONAL SAAS LANDING PAGE + AUTH MODAL
   // =========================================================
   if (!currentUser) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', fontFamily: "'Inter', system-ui, -apple-system, sans-serif", background: '#f8fafc' }}>
-        {/* Left Brand Showcase Panel */}
-        <div
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          fontFamily: "'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+          color: '#0f172a',
+          background: '#ffffff',
+          scrollBehavior: 'smooth'
+        }}
+      >
+        {/* 1. Sticky Glassmorphic Navbar */}
+        <header
           style={{
-            flex: 1.1,
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 55%, #311042 100%)',
-            color: 'white',
-            padding: '48px 56px',
+            background: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(12px)',
+            borderBottom: '1px solid #e2e8f0',
+            padding: '14px 6%',
             display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            position: 'sticky',
+            top: 0,
+            zIndex: 30
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {/* Brand Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
+            <div
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 10px rgba(37, 99, 235, 0.25)'
+              }}
+            >
               <Route size={20} color="white" />
             </div>
-            <span style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '-0.02em' }}>FootPrint</span>
+            <div>
+              <span style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-0.02em', color: '#0f172a' }}>
+                Foot<span style={{ color: '#2563eb' }}>Print</span>
+              </span>
+            </div>
           </div>
 
-          <div style={{ maxWidth: '480px' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '999px', background: 'rgba(255,255,255,0.1)', fontSize: '12px', fontWeight: 600, color: '#93c5fd', marginBottom: '20px' }}>
-              <Sparkles size={14} />
-              <span>Prerequisite-Aware Learning Engine</span>
-            </div>
-            <h2 style={{ fontSize: '36px', fontWeight: 800, lineHeight: 1.15, margin: '0 0 16px 0', letterSpacing: '-0.03em' }}>
-              Master complex skills without missing a single foundation.
-            </h2>
-            <p style={{ fontSize: '15px', lineHeight: 1.6, color: '#cbd5e1', margin: '0 0 32px 0' }}>
-              Interactive concept dependency graphs, dynamic mastery unlocking, shortest learning path calculation, and proctored assessments.
-            </p>
+          {/* Center Nav Links */}
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
+            <a href="#how-it-works" style={{ textDecoration: 'none', color: '#475569', fontWeight: 500, fontSize: '14px' }}>
+              How It Works
+            </a>
+            <a href="#features" style={{ textDecoration: 'none', color: '#475569', fontWeight: 500, fontSize: '14px' }}>
+              Features
+            </a>
+            <button
+              type="button"
+              onClick={() => openAuth('instructor', 'login')}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#475569',
+                fontWeight: 500,
+                fontSize: '14px',
+                cursor: 'pointer',
+                padding: 0
+              }}
+            >
+              For Instructors
+            </button>
+          </nav>
 
-            <div style={{ display: 'grid', gap: '14px' }}>
-              {[
-                { icon: <Layers size={16} color="#60a5fa" />, text: 'DAG-enforced curriculum with real-time cycle protection' },
-                { icon: <Route size={16} color="#fbbf24" />, text: 'Personalized shortest path & study-time estimation' },
-                { icon: <ShieldCheck size={16} color="#c084fc" />, text: 'Proctored fullscreen mastery assessments' }
-              ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13.5px', color: '#e2e8f0' }}>
-                  <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    {item.icon}
+          {/* Right Auth Action */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button
+              type="button"
+              onClick={() => openAuth('learner', 'login')}
+              style={{
+                background: '#0f172a',
+                color: 'white',
+                border: 'none',
+                padding: '9px 20px',
+                borderRadius: '8px',
+                fontWeight: 600,
+                fontSize: '13.5px',
+                cursor: 'pointer',
+                boxShadow: '0 2px 6px rgba(15, 23, 42, 0.12)'
+              }}
+            >
+              Log in
+            </button>
+          </div>
+        </header>
+
+        {/* 2. Hero Section */}
+        <section
+          style={{
+            background: 'radial-gradient(circle at 85% 20%, #eef2ff 0%, #f8fafc 45%, #ffffff 100%)',
+            padding: '72px 6% 80px',
+            borderBottom: '1px solid #f1f5f9'
+          }}
+        >
+          <div
+            style={{
+              maxWidth: '1160px',
+              margin: '0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '56px',
+              flexWrap: 'wrap'
+            }}
+          >
+            {/* Left Value Proposition */}
+            <div style={{ flex: '1 1 480px', maxWidth: '560px' }}>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 14px',
+                  borderRadius: '999px',
+                  background: '#eff6ff',
+                  border: '1px solid #dbeafe',
+                  color: '#1d4ed8',
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                  marginBottom: '22px'
+                }}
+              >
+                <Sparkles size={14} />
+                <span>AI-Assisted &amp; Prerequisite-Aware DSA Platform</span>
+              </div>
+
+              <h1
+                style={{
+                  fontSize: '48px',
+                  fontWeight: 800,
+                  lineHeight: 1.12,
+                  margin: '0 0 18px 0',
+                  color: '#0f172a',
+                  letterSpacing: '-0.03em'
+                }}
+              >
+                Master computer science <br />
+                <span style={{ background: 'linear-gradient(90deg, #2563eb, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  without knowledge gaps.
+                </span>
+              </h1>
+
+              <p
+                style={{
+                  fontSize: '17px',
+                  lineHeight: 1.65,
+                  color: '#475569',
+                  margin: '0 0 32px 0'
+                }}
+              >
+                FootPrint maps every concept into a directed dependency graph—unlocking advanced topics only after you prove mastery, computing your shortest path to any goal, and guiding you with a context-aware Gemini AI tutor.
+              </p>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => openAuth('learner', 'signup')}
+                  style={{
+                    background: 'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '14px 28px',
+                    borderRadius: '10px',
+                    fontWeight: 700,
+                    fontSize: '15px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 10px 24px -4px rgba(37, 99, 235, 0.35)'
+                  }}
+                >
+                  <span>Start Learning Free</span>
+                  <ArrowRight size={17} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => openAuth('instructor', 'login')}
+                  style={{
+                    background: '#ffffff',
+                    color: '#334155',
+                    border: '1px solid #cbd5e1',
+                    padding: '14px 22px',
+                    borderRadius: '10px',
+                    fontWeight: 600,
+                    fontSize: '14.5px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <ShieldCheck size={17} color="#7c3aed" />
+                  <span>Instructor Studio</span>
+                </button>
+              </div>
+
+              {/* Trust / Metric Highlights */}
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '32px',
+                  marginTop: '36px',
+                  paddingTop: '24px',
+                  borderTop: '1px solid #e2e8f0'
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a' }}>DAG-Enforced</div>
+                  <div style={{ fontSize: '12.5px', color: '#64748b' }}>Zero circular dependencies</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a' }}>Proctored</div>
+                  <div style={{ fontSize: '12.5px', color: '#64748b' }}>Fullscreen mastery checks</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a' }}>Gemini AI</div>
+                  <div style={{ fontSize: '12.5px', color: '#64748b' }}>Context-aware study hints</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Elevated Interactive Preview Card */}
+            <div style={{ flex: '1 1 400px', maxWidth: '470px' }}>
+              <div
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '20px',
+                  padding: '24px',
+                  boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.12)'
+                }}
+              >
+                {/* Window Top Bar */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '14px', marginBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#fca5a5' }} />
+                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#fcd34d' }} />
+                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#86efac' }} />
                   </div>
-                  <span>{item.text}</span>
+                  <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#64748b' }}>
+                    Target Path: Dynamic Programming (45m left)
+                  </span>
+                </div>
+
+                {/* Node Progression Preview */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderRadius: '12px', background: '#f0fdf4', border: '1.5px solid #22c55e' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <CheckCircle2 size={18} color="#16a34a" />
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#0f172a' }}>Recursion &amp; Call Stack</div>
+                        <div style={{ fontSize: '11.5px', color: '#15803d' }}>Score: 90% • Prerequisite Verified</div>
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#15803d', background: '#dcfce7', padding: '3px 9px', borderRadius: '999px' }}>
+                      Mastered
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'center', color: '#94a3b8', fontSize: '11.5px', fontWeight: 600 }}>
+                    ↓ Unlocks Next Step on Shortest Path
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderRadius: '12px', background: '#eff6ff', border: '1.5px solid #3b82f6' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <Unlock size={18} color="#2563eb" />
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#0f172a' }}>Memoization &amp; Top-Down DP</div>
+                        <div style={{ fontSize: '11.5px', color: '#1d4ed8' }}>20 mins • Ready for Proctored Quiz</div>
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#1d4ed8', background: '#dbeafe', padding: '3px 9px', borderRadius: '999px' }}>
+                      Unlocked
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'center', color: '#94a3b8', fontSize: '11.5px', fontWeight: 600 }}>
+                    ↓ Requires Mastery
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderRadius: '12px', background: '#f8fafc', border: '1.5px solid #cbd5e1' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <Lock size={18} color="#64748b" />
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#475569' }}>2D Tabulation &amp; Knapsack</div>
+                        <div style={{ fontSize: '11.5px', color: '#64748b' }}>25 mins • 1 prerequisite remaining</div>
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569', background: '#e2e8f0', padding: '3px 9px', borderRadius: '999px' }}>
+                      Locked
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. How It Works Section */}
+        <section id="how-it-works" style={{ padding: '64px 6%', background: '#ffffff' }}>
+          <div style={{ maxWidth: '1160px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', maxWidth: '620px', margin: '0 auto 44px' }}>
+              <div style={{ fontSize: '12.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#2563eb', marginBottom: '8px' }}>
+                Structured Mastery Workflow
+              </div>
+              <h2 style={{ fontSize: '30px', fontWeight: 800, margin: '0 0 10px 0', color: '#0f172a', letterSpacing: '-0.02em' }}>
+                How FootPrint keeps your learning on track
+              </h2>
+              <p style={{ fontSize: '15px', color: '#64748b', margin: 0, lineHeight: 1.6 }}>
+                Instead of jumping blindly into advanced problems, follow a verified dependency chain tailored to your target goal.
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+              {[
+                {
+                  step: '01',
+                  title: 'Pick Your Target Concept',
+                  desc: 'Select any advanced topic in the graph. FootPrint computes the exact topological prerequisite chain and total study minutes needed.'
+                },
+                {
+                  step: '02',
+                  title: 'Learn & Ask the AI Tutor',
+                  desc: 'Watch curated video lessons and ask the Gemini AI Tutor for hints or code walkthroughs tailored to your current node.'
+                },
+                {
+                  step: '03',
+                  title: 'Pass Proctored Mastery Checks',
+                  desc: 'Complete fullscreen mastery quizzes to unlock downstream concepts—even as instructors dynamically split or update topics.'
+                }
+              ].map((item) => (
+                <div
+                  key={item.step}
+                  style={{
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '16px',
+                    padding: '26px'
+                  }}
+                >
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#2563eb', marginBottom: '10px' }}>STEP {item.step}</div>
+                  <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a', margin: '0 0 8px 0' }}>{item.title}</h3>
+                  <p style={{ fontSize: '14px', color: '#475569', margin: 0, lineHeight: 1.6 }}>{item.desc}</p>
                 </div>
               ))}
             </div>
           </div>
+        </section>
 
-          <div style={{ fontSize: '12px', color: '#94a3b8' }}>
-            Adaptive Curriculum & Mastery Graph Platform
+        {/* 4. Core Features Grid */}
+        <section id="features" style={{ padding: '64px 6%', background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+          <div style={{ maxWidth: '1160px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px' }}>
+            <div style={{ background: 'white', padding: '24px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
+                <Layers size={20} color="#2563eb" />
+              </div>
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a', marginBottom: '6px' }}>Cycle-Safe DAG Engine</div>
+              <div style={{ fontSize: '13.5px', color: '#64748b', lineHeight: 1.55 }}>
+                Instructors build live prerequisite graphs with automatic cycle detection and mastery-preserving node splitting.
+              </div>
+            </div>
+
+            <div style={{ background: 'white', padding: '24px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
+                <Route size={20} color="#d97706" />
+              </div>
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a', marginBottom: '6px' }}>Shortest Path &amp; Time Estimator</div>
+              <div style={{ fontSize: '13.5px', color: '#64748b', lineHeight: 1.55 }}>
+                Highlights the exact unmastered ancestors required to reach any target skill along with cumulative lesson duration.
+              </div>
+            </div>
+
+            <div style={{ background: 'white', padding: '24px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#f3e8ff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
+                <ShieldCheck size={20} color="#7c3aed" />
+              </div>
+              <div style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a', marginBottom: '6px' }}>Proctored Assessments &amp; AI Tutor</div>
+              <div style={{ fontSize: '13.5px', color: '#64748b', lineHeight: 1.55 }}>
+                Fullscreen anti-cheat monitoring guarantees fair evaluation while the AI Tutor automatically pauses during tests.
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
-        {/* Right Auth Card Panel */}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px' }}>
-          <div style={{ width: '100%', maxWidth: '420px', background: 'white', borderRadius: '16px', padding: '32px', border: '1px solid #e2e8f0', boxShadow: '0 20px 25px -5px rgba(15, 23, 42, 0.08)' }}>
-            {loginPortal === 'learner' ? (
-              <>
-                <div style={{ textAlign: 'center', marginBottom: '22px' }}>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', borderRadius: '14px', background: '#eff6ff', color: '#2563eb', marginBottom: '12px' }}>
-                    <GraduationCap size={26} />
+        {/* 5. Footer */}
+        <footer style={{ background: '#0f172a', color: '#94a3b8', padding: '24px 6%', fontSize: '13px' }}>
+          <div style={{ maxWidth: '1160px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ fontWeight: 700, color: '#ffffff' }}>FootPrint Learning Platform</div>
+            <div>Prerequisite-Aware Curriculum Graph • Proctored Mastery • Gemini AI</div>
+          </div>
+        </footer>
+
+        {/* ========================================================= */}
+        {/* LOGIN / SIGNUP MODAL                                      */}
+        {/* ========================================================= */}
+        {showAuthModal && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(15, 23, 42, 0.65)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+              zIndex: 50
+            }}
+          >
+            <div style={{ width: '100%', maxWidth: '420px', background: 'white', borderRadius: '16px', padding: '28px', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.35)' }}>
+              <button
+                type="button"
+                onClick={() => setShowAuthModal(false)}
+                style={{ position: 'absolute', top: '16px', right: '16px', background: '#f1f5f9', border: 'none', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#475569' }}
+              >
+                <X size={18} />
+              </button>
+
+              {loginPortal === 'learner' ? (
+                <>
+                  <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '46px', height: '46px', borderRadius: '12px', background: '#eff6ff', color: '#2563eb', marginBottom: '10px' }}>
+                      <GraduationCap size={24} />
+                    </div>
+                    <h2 style={{ margin: 0, fontSize: '21px', fontWeight: 800, color: '#0f172a' }}>Learner Portal</h2>
+                    <p style={{ margin: '5px 0 0', fontSize: '13px', color: '#64748b' }}>Sign in or create a new student account</p>
                   </div>
-                  <h1 style={{ margin: 0, fontSize: '22px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>Learner Portal</h1>
-                  <p style={{ margin: '6px 0 0', fontSize: '13.5px', color: '#64748b' }}>Sign in or create a new student account</p>
-                </div>
 
-                {/* Learner Tabs: Login vs Create New Account */}
-                <div style={{ display: 'flex', background: '#f1f5f9', padding: '4px', borderRadius: '10px', marginBottom: '20px' }}>
-                  <button
-                    type="button"
-                    onClick={() => { setAuthTab('login'); setAuthError(''); }}
-                    style={{
-                      flex: 1,
-                      padding: '8px',
-                      borderRadius: '7px',
-                      border: 'none',
-                      fontWeight: 600,
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                      background: authTab === 'login' ? 'white' : 'transparent',
-                      color: authTab === 'login' ? '#0f172a' : '#64748b',
-                      boxShadow: authTab === 'login' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
-                    }}
-                  >
-                    Login
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setAuthTab('signup'); setAuthError(''); }}
-                    style={{
-                      flex: 1,
-                      padding: '8px',
-                      borderRadius: '7px',
-                      border: 'none',
-                      fontWeight: 600,
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                      background: authTab === 'signup' ? 'white' : 'transparent',
-                      color: authTab === 'signup' ? '#0f172a' : '#64748b',
-                      boxShadow: authTab === 'signup' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
-                    }}
-                  >
-                    Create New Account
-                  </button>
-                </div>
-
-                {authError && (
-                  <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', padding: '10px 12px', borderRadius: '8px', fontSize: '13px', marginBottom: '16px' }}>
-                    {authError}
+                  <div style={{ display: 'flex', background: '#f1f5f9', padding: '4px', borderRadius: '10px', marginBottom: '18px' }}>
+                    <button
+                      type="button"
+                      onClick={() => { setAuthTab('login'); setAuthError(''); }}
+                      style={{
+                        flex: 1,
+                        padding: '8px',
+                        borderRadius: '7px',
+                        border: 'none',
+                        fontWeight: 600,
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        background: authTab === 'login' ? 'white' : 'transparent',
+                        color: authTab === 'login' ? '#0f172a' : '#64748b',
+                        boxShadow: authTab === 'login' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
+                      }}
+                    >
+                      Login
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setAuthTab('signup'); setAuthError(''); }}
+                      style={{
+                        flex: 1,
+                        padding: '8px',
+                        borderRadius: '7px',
+                        border: 'none',
+                        fontWeight: 600,
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        background: authTab === 'signup' ? 'white' : 'transparent',
+                        color: authTab === 'signup' ? '#0f172a' : '#64748b',
+                        boxShadow: authTab === 'signup' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
+                      }}
+                    >
+                      Create New Account
+                    </button>
                   </div>
-                )}
 
-                <form onSubmit={handleAuthSubmit}>
-                  {authTab === 'signup' && (
-                    <div style={{ marginBottom: '14px' }}>
-                      <label style={styles.label}>Full Name</label>
-                      <input
-                        required
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Enter your full name"
-                        style={styles.input}
-                      />
+                  {authError && (
+                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', padding: '10px 12px', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }}>
+                      {authError}
                     </div>
                   )}
 
-                  <div style={{ marginBottom: '14px' }}>
-                    <label style={styles.label}>Student Email</label>
-                    <input
-                      required
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="student@example.com"
-                      style={styles.input}
-                    />
+                  <form onSubmit={handleAuthSubmit}>
+                    {authTab === 'signup' && (
+                      <div style={{ marginBottom: '12px' }}>
+                        <label style={styles.label}>Full Name</label>
+                        <input
+                          required
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          placeholder="Enter your full name"
+                          style={styles.input}
+                        />
+                      </div>
+                    )}
+
+                    <div style={{ marginBottom: '12px' }}>
+                      <label style={styles.label}>Student Email</label>
+                      <input
+                        required
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="student@example.com"
+                        style={styles.input}
+                      />
+                    </div>
+
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={styles.label}>Password</label>
+                      <input
+                        required
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        style={styles.input}
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      style={{
+                        width: '100%',
+                        padding: '11px',
+                        background: 'linear-gradient(135deg, #2563eb, #4f46e5)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <span>{authTab === 'signup' ? 'Create Learner Account' : 'Login as Learner'}</span>
+                      <ArrowRight size={16} />
+                    </button>
+                  </form>
+
+                  <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #e2e8f0' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLoginPortal('instructor');
+                        setAuthTab('login');
+                        setAuthError('');
+                        setEmail('');
+                        setPassword('');
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        background: '#faf5ff',
+                        color: '#6b21a8',
+                        border: '1px solid #d8b4fe',
+                        borderRadius: '8px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        fontSize: '13px'
+                      }}
+                    >
+                      <ShieldCheck size={16} />
+                      <span>Login as Instructor</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '46px', height: '46px', borderRadius: '12px', background: '#f3e8ff', color: '#7c3aed', marginBottom: '10px' }}>
+                      <ShieldCheck size={24} />
+                    </div>
+                    <h2 style={{ margin: 0, fontSize: '21px', fontWeight: 800, color: '#0f172a' }}>Instructor Login</h2>
+                    <p style={{ margin: '5px 0 0', fontSize: '13px', color: '#64748b' }}>Authorized curriculum editors only</p>
                   </div>
 
-                  <div style={{ marginBottom: '18px' }}>
-                    <label style={styles.label}>Password</label>
-                    <input
-                      required
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      style={styles.input}
-                    />
+                  {authError && (
+                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', padding: '10px 12px', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }}>
+                      {authError}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleAuthSubmit}>
+                    <div style={{ marginBottom: '12px' }}>
+                      <label style={styles.label}>Instructor Email</label>
+                      <input
+                        required
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="instructor@footprint.edu"
+                        style={styles.input}
+                      />
+                    </div>
+
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={styles.label}>Password</label>
+                      <input
+                        required
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        style={styles.input}
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      style={{
+                        width: '100%',
+                        padding: '11px',
+                        background: '#7c3aed',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                      }}
+                    >
+                      Enter Instructor Studio
+                    </button>
+                  </form>
+
+                  <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEmail('instructor@footprint.edu');
+                        setPassword('admin123');
+                      }}
+                      style={{ width: '100%', padding: '8px', background: '#f8fafc', color: '#475569', border: '1px dashed #cbd5e1', borderRadius: '8px', fontSize: '12px', cursor: 'pointer' }}
+                    >
+                      Auto-fill Demo Instructor (instructor@footprint.edu / admin123)
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLoginPortal('learner');
+                        setAuthError('');
+                        setEmail('');
+                        setPassword('');
+                      }}
+                      style={{ width: '100%', padding: '8px', background: 'transparent', color: '#2563eb', border: 'none', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
+                    >
+                      ← Back to Learner Login / Sign Up
+                    </button>
                   </div>
-
-                  <button
-                    type="submit"
-                    style={{
-                      width: '100%',
-                      padding: '11px',
-                      background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '9px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)'
-                    }}
-                  >
-                    <span>{authTab === 'signup' ? 'Create Learner Account' : 'Login as Learner'}</span>
-                    <ArrowRight size={16} />
-                  </button>
-                </form>
-
-                {/* Separate Button to Switch to Instructor Login */}
-                <div style={{ marginTop: '24px', paddingTop: '18px', borderTop: '1px solid #e2e8f0', textAlign: 'center' }}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLoginPortal('instructor');
-                      setAuthTab('login');
-                      setAuthError('');
-                      setEmail('');
-                      setPassword('');
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      background: '#faf5ff',
-                      color: '#6b21a8',
-                      border: '1px solid #d8b4fe',
-                      borderRadius: '9px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      fontSize: '13px'
-                    }}
-                  >
-                    <ShieldCheck size={16} />
-                    <span>Login as Instructor</span>
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div style={{ textAlign: 'center', marginBottom: '22px' }}>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', borderRadius: '14px', background: '#f3e8ff', color: '#7c3aed', marginBottom: '12px' }}>
-                    <ShieldCheck size={26} />
-                  </div>
-                  <h1 style={{ margin: 0, fontSize: '22px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>Instructor Login</h1>
-                  <p style={{ margin: '6px 0 0', fontSize: '13.5px', color: '#64748b' }}>Authorized curriculum editors only</p>
-                </div>
-
-                {authError && (
-                  <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', padding: '10px 12px', borderRadius: '8px', fontSize: '13px', marginBottom: '16px' }}>
-                    {authError}
-                  </div>
-                )}
-
-                <form onSubmit={handleAuthSubmit}>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label style={styles.label}>Instructor Email</label>
-                    <input
-                      required
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="instructor@footprint.edu"
-                      style={styles.input}
-                    />
-                  </div>
-
-                  <div style={{ marginBottom: '18px' }}>
-                    <label style={styles.label}>Password</label>
-                    <input
-                      required
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      style={styles.input}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    style={{
-                      width: '100%',
-                      padding: '11px',
-                      background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '9px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      boxShadow: '0 4px 12px rgba(124, 58, 237, 0.25)'
-                    }}
-                  >
-                    Enter Instructor Studio
-                  </button>
-                </form>
-
-                <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail('instructor@footprint.edu');
-                      setPassword('admin123');
-                    }}
-                    style={{ width: '100%', padding: '9px', background: '#f8fafc', color: '#475569', border: '1px dashed #cbd5e1', borderRadius: '8px', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
-                  >
-                    Auto-fill Demo Instructor (instructor@footprint.edu / admin123)
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLoginPortal('learner');
-                      setAuthError('');
-                      setEmail('');
-                      setPassword('');
-                    }}
-                    style={{ width: '100%', padding: '8px', background: 'transparent', color: '#2563eb', border: 'none', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
-                  >
-                    ← Back to Learner Login / Sign Up
-                  </button>
-                </div>
-              </>
-            )}
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     );
   }
