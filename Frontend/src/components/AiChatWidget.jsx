@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { MessageSquare, X, Send, Sparkles, Bot } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function AiChatWidget({ selectedConcept, currentUser, isQuizActive }) {
   const [isOpen, setIsOpen] = useState(false);
