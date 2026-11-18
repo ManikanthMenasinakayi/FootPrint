@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Environment variables (NEVER push API keys or DB URIs)
+.env
+Backend/.env
+Frontend/.env
+
+# Build outputs & logs
+dist/
+build/
+.DS_Store
+*.log
