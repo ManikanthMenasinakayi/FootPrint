@@ -1,5 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import MongoStore from 'connect-mongo';
 import cors from 'cors';
 import 'dotenv/config';
 import { Course, Concept, Progress, User } from './models.js';
